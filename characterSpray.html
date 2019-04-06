@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        
+        <script>
+
+                let message = "The_Galaxy_is_on_Orion's_Belt";
+                let messageArr = Array.from(message);
+                let num = 0;
+                let cursor = {x:0, y:0};
+                let position = {x:cursor.x, y:cursor.y};
+                let particles = [];
+
+                function start() {
+                    bindEvents();
+                    loop();
+                }
+
+                function applyCSS(el, css){
+                    for (prop in css){
+                        el.style[prop] = css[prop];
+                    }
+                }
+
+                function bindEvents(){
+                    document.addEventListener("mousedown", onMouseDown);
+                    document.addEventListener("touchmove", onTouchMove);
+                    document.addEventListener("mousemove", onMouseMove);
+                }
+
+                function onTouchMove(e) {
+                    if(num < message.length - 1){
+                        num++;
+                    }else{
+                        num=0;
+                    }
+                    if (e.touches.length > 0) {
+                        for (var i = 0; i < e.touches.length; i++) {
+                            addParticle(e.touches[i].clientX, e.touches[i].clientY, num);
+                        }
+                    }
+                }
+                function onMouseMove(e){
+                    cursor.x = e.clientX;
+                    cursor.y = e.clientY;
+                }
+                function onMouseDown(){
+                    document.addEventListener("mouseup", onMouseUp);
+                    function fire(){
+                        if(num < message.length - 1){
+                            num++;
+                        }else{
+                            num=0;
+                        }
+                        addParticle(cursor.x, cursor.y, num);
+                    }
+                    let fire1 = setInterval(function(){fire()},20);
+                    function onMouseUp(){
+                        clearInterval(fire1);
+                    }
+                }
+                function addParticle(x, y, number){
+                    let particle = new Particle();
+                    particle.init(x, y, number);
+                    particles.push(particle);
+                }
+
+                function updateParticles(){
+                    for (i=0; i<=particles.length - 1; i++){
+                        particles[i].update();
+                    }
+                    for (var i = particles.length - 1; i >= 0; i--) {
+                        if (particles[i].lifeSpan <= 0) {
+                            particles[i].die();
+                            particles.splice(i, 1);
+                        }
+                    }
+                }
+                function loop() {
+                    requestAnimationFrame(loop);
+                    if(particles.length>0){
+                        updateParticles();
+                    }
+                }
+                
+
+                function Particle() {
+                    this.initialCSS = {
+                    "position": "absolute",
+                    "display": "block",
+                    "pointerEvents": "none",
+                    "z-index": "10000000",
+                    "fontSize": "16px",
+                    "will-change": "transform" };
+
+                    this.init = function(x, y, number){
+                        this.velocity = {
+                            x: (Math.random() < 0.5 ? -1 : 1) * (Math.random() / 2),
+                            y: 1 + Math.random() };
+                            
+                        this.lifeSpan = 120 + Math.floor(Math.random() * 60); //ms
+                        this.position = {x:x - 15, y:y - 20};
+                        this.char = messageArr[number];
+                        this.element = document.createElement('span');
+                        this.element.innerHTML = this.char;
+                        applyCSS(this.element, this.initialCSS);
+                        this.update();
+                        document.body.appendChild(this.element);
+                    }
+                    this.update = function(){
+                        this.lifeSpan--;
+                        this.position.x += this.velocity.x;
+                        this.position.y += this.velocity.y;
+                        this.velocity.x += (Math.random() < 0.5 ? -1 : 1) * 2 / 75;
+                        this.velocity.y -= Math.random() / 400;
+                        this.element.style.transform = "translate3d(" + this.position.x + "px," + this.position.y + "px,0) scale(" + this.lifeSpan / 180 + ")rotate(" +
+                        2 * this.lifeSpan + "deg)";
+                    }
+                    this.die = function () {
+                        this.element.parentNode.removeChild(this.element);
+                    };
+
+                }
+                start();
+
+
+        </script>
+    </body>
+</html>
