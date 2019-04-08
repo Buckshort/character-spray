@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        
+        <canvas id="canvas">
+        </canvas>
+        <p></p>
+
+        <script>
+            window.onload = cursorTrailCanvas();
+            function cursorTrailCanvas(){
+                const canvas = document.getElementById("canvas");
+                canvas.width = window.innerWidth - 15;
+                canvas.height = window.innerHeight -15 ;
+                const c = canvas.getContext('2d');
+                
+                let cursor = {x:0, y:0};
+                const p = document.querySelector("p");
+                let pMessage = "Default Message";
+                let pMessage2 = "speed";
+                let circles = [];
+
+                p.innerHTML = pMessage + " " + pMessage2;
+
+                addEventListener("mousedown", onMouseDown);
+                addEventListener("mousemove", onMouseMove);
+                
+                function onMouseMove(e){
+                    cursor.x = e.clientX;
+                    cursor.y = e.clientY;
+                    circles.push(new Circle(cursor.x, cursor.y, Math.random()*10));
+                    console.log(circles);
+                }
+
+                function onMouseDown(){
+                    pMessage = `x: ${cursor.x}, y: ${cursor.y}`;
+                    for (i=0; i<circles.length; i++){
+                        pMessage2 = " speed: " + circles[i].x;
+                    }
+
+                    p.innerHTML = pMessage + pMessage2;
+                   
+                }
+
+                function Circle(x, y, rad){
+                    this.lifespan = 300;
+                    this.opacity = 1;
+                    this.x = x;
+                    this.y = y;
+                    this.vx = (Math.random() < 0.5 ? -1 : 1) * Math.random()*3;
+                    this.vy = (Math.random() < 0.5 ? -1 : 1) * Math.random()*3;
+                    this.rad = rad;
+                    this.draw = function(){
+                        c.beginPath();
+                        c.strokeStyle = 'rgba(50, 90, 200, ' + this.opacity + ')';
+                        c.fillStyle = 'rgba(50, 90, 200, ' + this.opacity + ')';
+                        c.arc(this.x, this.y, this.rad, 0, Math.PI * 2);
+                        c.fill();
+                        c.stroke();
+                    }
+                    this.update = function(){
+                        this.lifespan--;
+                        this.opacity = this.lifespan/300;
+                        if(this.x >= window.innerWidth || this.x <= 0){
+                            this.vx*= -1;
+                        }
+                        if(this.y >= window.innerHeight || this.y <= 0){
+                            this.vy*= -1;
+                        }
+                        this.x = this.x + this.vx;
+                        this.y = this.y + this.vy;
+                        this.draw();
+                    }
+                    
+                }
+                function animate(){
+                    window.requestAnimationFrame(animate);
+                    c.clearRect(0,0,innerWidth, innerHeight);
+                    for(let i in circles){
+                        circles[i].update();
+                        if (circles[i].lifespan <= 0){
+                            circles.splice(i, 1);
+                        }
+                    }
+                }
+                animate();
+            }
+        </script>
+    </body>
+</html>
